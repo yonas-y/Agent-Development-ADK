@@ -104,7 +104,7 @@ coverage.xml
 .prof
 
 # API key
-1-basic-agent/greeting-agent/.env
+/1-basic-agent/greeting-agent/.env
 
 # Test outputs
 test_output/
