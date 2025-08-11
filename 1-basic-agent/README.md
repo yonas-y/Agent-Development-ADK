@@ -28,20 +28,6 @@ The agent is designed to greet users by asking for their name and responding wit
    adk run agent.py
    ```
 
-## agent.py
-
-```python
-from google.adk.agents import Agent
-
-root_agent = Agent(
-    name="greeting_agent",
-    model="gemini-2.0-flash",
-    description="A simple agent that greets the user.",
-    instruction="You are a helpful assistant. Ask the user's for their name"
-                "and greet them by name."
-)
-```
-
 ## Requirements
 
 - Python 3.8+
