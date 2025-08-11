@@ -35,4 +35,4 @@ The agent is designed to greet users by asking for their name and responding wit
 
 ## License
 
-This project is for
+This project is for educational purposes.
