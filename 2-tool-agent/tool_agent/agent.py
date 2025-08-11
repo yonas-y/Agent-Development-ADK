@@ -1,9 +1,11 @@
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from google.adk.tools import agent_tool
+from google.adk.tools import langchain_tool
 
 from .custom_agents import google_search_agent
 from .custom_functions import get_fx_rate
+from .third_party_tools import langchain_wikipedia_tool
 from typing import Dict
 from datetime import datetime
 
@@ -25,6 +27,7 @@ root_agent = Agent(
     tools=[
         FunctionTool(get_fx_rate),
         FunctionTool(get_current_time),
-        agent_tool.AgentTool(google_search_agent, "google_search_agent")
+        agent_tool.AgentTool(google_search_agent, "google_search_agent"),
+        langchain_tool.LangchainTool(langchain_wikipedia_tool, "langchain_wikipedia_tool")
     ]
 )
