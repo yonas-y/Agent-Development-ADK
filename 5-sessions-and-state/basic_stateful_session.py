@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService, Session 
 from google.genai import types
-from question_answering_agent import agent
+from question_answering_agent.agent import question_answering_agent
+
 
 load_dotenv()
 
@@ -42,3 +43,9 @@ async def main():
     print(f"---------------------------------")
 
 asyncio.run(main())
+
+runner = Runner(
+    agent=question_answering_agent,
+    app_name=APP_NAME,
+    session_service=session_service_stateful,
+)
