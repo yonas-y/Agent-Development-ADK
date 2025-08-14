@@ -42,10 +42,37 @@ async def main():
     print(f"\tLast Update (`last_update_time`): {stateful_session.last_update_time:.2f}")
     print(f"---------------------------------")
 
-asyncio.run(main())
+    runner = Runner(
+        agent=question_answering_agent,
+        app_name=APP_NAME,
+        session_service=session_service_stateful,
+    )
 
-runner = Runner(
-    agent=question_answering_agent,
-    app_name=APP_NAME,
-    session_service=session_service_stateful,
-)
+    new_message = types.Content(
+        role="user",
+        parts=[types.Part(text="What is my favorite food?")],
+    )
+
+    print("Agent response:")
+    for event in runner.run(
+        user_id=USER_ID,
+        session_id=SESSION_ID,
+        new_message=new_message,
+    ):
+        if event.is_final_response():
+            if event.content and event.content.parts:
+                print(f"Final response: {event.content.parts[0].text}")
+
+    print("Session event exploration....:")
+    session = await session_service_stateful.get_session(
+        app_name=APP_NAME,
+        user_id=USER_ID,
+        session_id=SESSION_ID,
+    )
+
+    print("Final session state:")
+    for key, event in session.state.items():
+        print(f"\t{key}: {event}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
