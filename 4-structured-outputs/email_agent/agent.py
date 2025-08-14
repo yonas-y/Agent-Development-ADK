@@ -11,7 +11,7 @@ class EmailContent(BaseModel):
         )
 
 # ------ Create Email Generator Agent ------- #
-email_agent = LlmAgent(
+root_agent = LlmAgent(
     name="email_agent",
     model="gemini-2.0-flash",
     instruction= 
