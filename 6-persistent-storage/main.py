@@ -20,7 +20,11 @@ initial_state = {
 
 async def main():
     # Set up constants.
+<<<<<<< HEAD
     APP_NAME = "Reminder Agent App"
+=======
+    APP_NAME = "Memory Agent App"
+>>>>>>> 2821f5cda9ff8393f235174a1157e68cbd9c77b0
     USER_ID = initial_state["user_id"]
     USER_NAME = initial_state["user_name"]
     REMINDERS = initial_state["reminders"]
@@ -37,7 +41,11 @@ async def main():
         SESSION_ID = existing_sessions[0].id
         print(f"Continuing with existing session: {SESSION_ID}")
     else:
+<<<<<<< HEAD
         new_session = await session_service.create_session(
+=======
+        new_session = session_service.create_session(
+>>>>>>> 2821f5cda9ff8393f235174a1157e68cbd9c77b0
             app_name=APP_NAME,
             user_id=USER_ID,
             state=initial_state,
@@ -45,6 +53,7 @@ async def main():
         SESSION_ID = new_session.id
         print(f"Created new session: {SESSION_ID}")
 
+<<<<<<< HEAD
     # ===== Part 4: Agent runner setup ===== #
     # Create a runner with the reminder agent.
     runner = Runner(
@@ -119,3 +128,5 @@ reminder_agent = Agent(
     #     ],
 )
     
+=======
+>>>>>>> 2821f5cda9ff8393f235174a1157e68cbd9c77b0
