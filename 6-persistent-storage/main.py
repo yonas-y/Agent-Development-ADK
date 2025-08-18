@@ -33,5 +33,27 @@ initial_state = {
     "reminders": [],
 }
 
-if __name__ == "__main__":
-    asyncio.run(main())
+# ==== Session Management ==== #
+async def get_or_create_session(user_id: str):
+    """Retrieve an existing session or create a new one."""
+    existing_sessions = session_service.list_sessions(
+        app_name=APP_NAME,
+        user_id=user_id,
+    )
+
+    if existing_sessions:
+        session_id = existing_sessions[0].id
+        print(f"Continuing with existing session: {session_id}")
+        return session_id
+
+    new_session = await session_service.create_session(
+        app_name=APP_NAME,
+        user_id=user_id,
+        state=initial_state,
+    )
+    print(f"Created new session: {new_session.id}")
+    return new_session.id
+
+
+# if __name__ == "__main__":
+#     asyncio.run(main())
