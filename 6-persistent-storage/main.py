@@ -36,13 +36,13 @@ initial_state = {
 # ==== Session Management ==== #
 async def get_or_create_session(user_id: str):
     """Retrieve an existing session or create a new one."""
-    existing_sessions = session_service.list_sessions(
+    existing_sessions = await session_service.list_sessions(
         app_name=APP_NAME,
         user_id=user_id,
     )
 
-    if existing_sessions:
-        session_id = existing_sessions[0].id
+    if existing_sessions.sessions:
+        session_id = existing_sessions.sessions[0].id
         print(f"Continuing with existing session: {session_id}")
         return session_id
 
@@ -54,6 +54,48 @@ async def get_or_create_session(user_id: str):
     print(f"Created new session: {new_session.id}")
     return new_session.id
 
+# ==== Main Loop ==== #
+async def main():
 
-# if __name__ == "__main__":
-#     asyncio.run(main())
+    user_id = initial_state["user_id"]
+
+    # Session management
+    session_id = await get_or_create_session(user_id)
+
+    # Runner with reminder agent
+    runner = Runner(
+        agent=reminder_agent,
+        app_name=APP_NAME,
+        session_service=session_service,
+    )
+
+    # Welcome message
+    print("\n✨ Welcome to the Reminder Agent App!")
+    print("Your reminders will be remembered across sessions.")
+    print("Type 'exit' or 'quit' to end the conversation.\n")
+
+    # Conversation loop
+    while True:
+        try:
+            user_input = input("You: ")
+
+            if user_input.lower() in ["exit", "quit"]:
+                print("👋 Goodbye! Your data has been saved.")
+                break
+
+            # Process input with agent
+            response = await runner.run(
+                user_id=user_id,
+                session_id=session_id,
+                user_input=user_input
+            )
+            print(f"Reminder Agent: {response}")
+
+        except KeyboardInterrupt:
+            print("\n👋 Interrupted. Exiting...")
+            break
+        except Exception as e:
+            print(f"⚠️ Error: {e}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
