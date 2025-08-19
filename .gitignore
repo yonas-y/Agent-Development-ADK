@@ -108,12 +108,12 @@ test_output/
 output/
 
 # Test Jupyter Script!!
-Test_Scripts.ipynb
 /output
 /data
 /saved_model_artifact
 launchers/
 configs/
 
-
-app/fast-soft-sort-master/
+# Database data.
+*.db
+*.sqlite
