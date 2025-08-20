@@ -1,43 +1,39 @@
 # Session service + context memory
 import json
 from database import get_connection
-from main import APP_NAME
+from config import APP_NAME, db_path
 
 initial_state = json.dumps({"history": []})  # simple JSON for context memory
 
 class SessionService:
     async def list_sessions(self, app_name: str, user_id: str):
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT id, state FROM sessions WHERE app_name = ? AND user_id = ?", (app_name, user_id))
-        rows = cursor.fetchall()
-        conn.close()
+        with get_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, state FROM sessions WHERE app_name = ? AND user_id = ?", (app_name, user_id))
+            rows = cursor.fetchall()
         return {"sessions": [{"id": row[0], "state": row[1]} for row in rows]}
 
     async def create_session(self, app_name: str, user_id: str, state: str):
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO sessions (app_name, user_id, state) VALUES (?, ?, ?)", (app_name, user_id, state))
-        conn.commit()
-        session_id = cursor.lastrowid
-        conn.close()
+        with get_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO sessions (app_name, user_id, state) VALUES (?, ?, ?)", (app_name, user_id, state))
+            conn.commit()
+            session_id = cursor.lastrowid
         return {"id": session_id, "state": state}
 
     async def update_session_state(self, session_id: int, new_state: dict):
         """Store updated state (context memory) as JSON."""
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("UPDATE sessions SET state = ? WHERE id = ?", (json.dumps(new_state), session_id))
-        conn.commit()
-        conn.close()
+        with get_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE sessions SET state = ? WHERE id = ?", (json.dumps(new_state), session_id))
+            conn.commit()
 
     async def get_session_state(self, session_id: int):
         """Retrieve state JSON as dict."""
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT state FROM sessions WHERE id = ?", (session_id,))
-        row = cursor.fetchone()
-        conn.close()
+        with get_connection(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT state FROM sessions WHERE id = ?", (session_id,))
+            row = cursor.fetchone()
         if row:
             try:
                 return json.loads(row[0])
