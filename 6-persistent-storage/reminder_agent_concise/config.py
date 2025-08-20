@@ -1,3 +1,11 @@
+"""
+Project Configuration File
+
+Contains:
+- Database configuration.
+- Agent related common configurations.
+"""
+
 # ==== CONFIGURATION ==== #
 DB_URL  = "sqlite:///reminder_agent_data.db"  
 
