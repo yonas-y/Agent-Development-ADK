@@ -4,7 +4,6 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from agent import reminder_agent
-from tools import add_reminder, view_reminders, update_reminder, delete_reminder
 
 load_dotenv()
 
