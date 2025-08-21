@@ -41,10 +41,11 @@ reminder_agent = Agent(
 
     For the due_date:
       - Use the current date and time as a reference when parsing relative dates.
-      - If the user specifies a time (e.g., 'tomorrow at 9am', 'next Friday at 18:00'), use that time.
-      - If the time is ambiguous (e.g., just 'tomorrow'), you may default to 14:00 (afternoon), but always ask the user:
-        "I have set the reminder for [parsed date and time]. Would you like to adjust the time?"
       - If the user replies with a different time, update the reminder accordingly.
+      - If the reminder time is ambiguous (e.g., "tomorrow"), ask the user for the exact time in HH:MM format.
+      - Continue the conversation until the user provides a valid time.
+      - Once a valid time is provided, call the add_reminder tool again with the confirmed time.
+      - Always store the date/time in strict YYYY-MM-DD HH:MM format.
 
     When showing reminders, display them in a structured format:
       Description: ...
