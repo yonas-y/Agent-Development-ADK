@@ -1,5 +1,5 @@
 import dateparser
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def parse_due_date(text: str) -> str:
     """
@@ -43,5 +43,8 @@ def parse_due_date(text: str) -> str:
             # Ambiguous time: default to 14:00
             dt = dt.replace(hour=14, minute=0)
             # Agent should ask the user to confirm or adjust the time
+        # Ensure relative dates like "tomorrow" are always in the future
+    if dt.date() <= now.date():
+        dt += timedelta(days=1)
 
     return dt.strftime("%Y-%m-%d %H:%M")
