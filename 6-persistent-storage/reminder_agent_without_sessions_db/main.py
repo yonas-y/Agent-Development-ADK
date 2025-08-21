@@ -4,6 +4,7 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from agent import reminder_agent
+from tools import add_reminder, view_reminders, update_reminder, delete_reminder
 
 load_dotenv()
 
@@ -28,9 +29,6 @@ async def main():
     print(f"\tSession ID: {stateful_session.id}")
     print(f"\tApplication Name: {stateful_session.app_name}")
     print(f"\tUser ID: {stateful_session.user_id}")
-    # print(f"\tState (`state`): {stateful_session.state}") # Note: Only shows initial state here
-    print(f"\tEvents: {stateful_session.events}") # Initially empty
-    print(f"\tLast Update: {stateful_session.last_update_time:.2f}")
     print(f"---------------------------------")
 
     # Use a runner without sessions
@@ -42,7 +40,7 @@ async def main():
     while True:
         try:
             user_input = input("📥 Input something for the reminder app: ")
-            if user_input.lower() == "exit":
+            if user_input.lower() == "exit" or user_input.lower() == "quit":
                 print("👋 Goodbye!")
                 break
 
@@ -57,9 +55,10 @@ async def main():
                 session_id=USER_ID,
                 new_message=user_message,
             ):
-                if event.is_final_response():
-                    if event.content and event.content.parts:
-                        print(f"Reminder: {event.content.parts[0].text}")
+                if event.is_final_response() and event.content and event.content.parts:
+                    for part in event.content.parts:
+                        if part.text:
+                            print(part.text)
 
         except KeyboardInterrupt:
             print("\n👋 Interrupted. Exiting...")
