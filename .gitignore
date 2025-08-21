@@ -113,7 +113,11 @@ output/
 /saved_model_artifact
 launchers/
 configs/
+test.ipynb
 
 # Database data.
 *.db
 *.sqlite
+
+# Reference text files.
+*.txt
