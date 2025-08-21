@@ -1,12 +1,10 @@
 import sqlite3
-from datetime import datetime
 from typing import List, Dict, Optional
-
-DB_FILE = "reminders.db"
+from config import DB_PATH
 
 # Initialize the database and table
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
         CREATE TABLE IF NOT EXISTS reminders (
@@ -22,7 +20,7 @@ def init_db():
 
 # Add a new reminder
 def add_reminder_db(user_id: str, description: str, due_date: str, remark: Optional[str] = None):
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
         INSERT INTO reminders (user_id, description, due_date, remark)
@@ -33,7 +31,7 @@ def add_reminder_db(user_id: str, description: str, due_date: str, remark: Optio
 
 # Get all reminders for a user
 def get_reminders_db(user_id: str) -> List[Dict]:
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT id, description, due_date, remark FROM reminders WHERE user_id = ? ORDER BY due_date", (user_id,))
     rows = c.fetchall()
@@ -42,7 +40,7 @@ def get_reminders_db(user_id: str) -> List[Dict]:
 
 # Update a reminder by ID
 def update_reminder_db(reminder_id: int, description: Optional[str] = None, due_date: Optional[str] = None, remark: Optional[str] = None) -> bool:
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     updates = []
     params = []
@@ -70,13 +68,10 @@ def update_reminder_db(reminder_id: int, description: Optional[str] = None, due_
 
 # Delete a reminder by ID
 def delete_reminder_db(reminder_id: int) -> bool:
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("DELETE FROM reminders WHERE id = ?", (reminder_id,))
     conn.commit()
     deleted = c.rowcount > 0
     conn.close()
     return deleted
-
-# Initialize DB on import
-init_db()
