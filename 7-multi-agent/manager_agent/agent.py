@@ -1,4 +1,9 @@
 from google.adk.agents import Agent
+from google.adk.tools.agent_tool import AgentTool
+from sub_agents.stock_analyst import stock_analyst
+from sub_agents.trend_predictor import trend_predictor
+from sub_agents.news_analyst import news_analyst
+from tools.tools import get_current_time_tool
 
 instruction_text ="""
 Instruction:
@@ -29,6 +34,12 @@ manager_agent = Agent(
     model="gemini-2.0-flash",
     description="Manager agent for orchestrating sub-agents in stock market analysis.",
     instruction=instruction_text,
+    sub_agents={
+        "stock_analyst": stock_analyst,
+        "trend_predictor": trend_predictor
+    },
     tools=[
+        AgentTool(news_analyst),
+        get_current_time_tool
     ]
 )
