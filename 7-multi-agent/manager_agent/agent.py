@@ -1,9 +1,10 @@
 from google.adk.agents import Agent
+from google.adk.tools import FunctionTool
 from google.adk.tools.agent_tool import AgentTool
-from sub_agents.stock_analyst import stock_analyst
-from sub_agents.trend_predictor import trend_predictor
-from sub_agents.news_analyst import news_analyst
-from tools.tools import get_current_time_tool
+from .sub_agents.news_analyst.agent import news_analyst_agent
+from .sub_agents.stock_analyst.agent import stock_analyst_agent
+from .sub_agents.trend_predictor.agent import trend_predictor_agent
+from .utils.tools import get_current_time
 
 instruction_text ="""
 You are the Manager Agent, responsible for orchestrating a team of 
@@ -43,11 +44,11 @@ manager_agent = Agent(
     "risk assessment, trend forecasting, and news-driven sentiment",
     instruction=instruction_text,
     sub_agents={
-        "stock_analyst": stock_analyst,
-        "trend_predictor": trend_predictor
+        "stock_analyst": stock_analyst_agent,
+        "trend_predictor": trend_predictor_agent,
     },
     tools=[
-        AgentTool(news_analyst),
-        get_current_time_tool
+        AgentTool(news_analyst_agent),
+        FunctionTool(get_current_time)
     ]
 )
