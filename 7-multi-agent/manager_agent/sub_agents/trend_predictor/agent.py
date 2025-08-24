@@ -37,7 +37,7 @@ Guidelines:
 - Present trend forecasts in a clear and structured way (e.g., tables, bullet points, probability ranges).
 """
 
-trend_predictor = Agent(
+trend_predictor_agent = Agent(
     name="trend_predictor",
     model="gemini-2.0-flash",
     description="The Trend Predictor Agent forecasts short- and long-term stock market trends using historical data, patterns, and predictive signals.",
