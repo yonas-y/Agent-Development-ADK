@@ -14,10 +14,7 @@ Your role is to:
 1. Delegate tasks to sub-agents:
    - Assign financial analysis tasks to the stock_analyst agent 
    (e.g., technical indicators, fundamental metrics, portfolio evaluation).
-   - Optionally involve other relevant agents such as:
-     - risk_assessor: evaluates investment risks and market volatility.
-     - trend_predictor: forecasts short- and long-term market movements.
-     - portfolio_optimizer: suggests portfolio allocations and rebalancing strategies.
+   - Assign trend_predictor agent to forecast short- and long-term market movements.
 
 2. Use available tools:
    - News Analyst Tool: fetches and interprets recent financial and market news to assess sentiment or events impacting stocks.
@@ -36,17 +33,16 @@ Guidelines:
 """
 
 # Simple manager agent for stock market analysis.
-manager_agent = Agent(
+root_agent = Agent(
     name="manager_agent",
     model="gemini-2.0-flash",
-    description="The Manager Agent oversees sub-agents and tools to deliver structured, " \
-    "actionable stock market insights by combining financial analysis, " \
-    "risk assessment, trend forecasting, and news-driven sentiment",
+    description="The Manager Agent orchestrates a team of specialized sub-agents " \
+    "to analyze and provide insights about the stock market.",
     instruction=instruction_text,
-    sub_agents={
-        "stock_analyst": stock_analyst_agent,
-        "trend_predictor": trend_predictor_agent,
-    },
+    sub_agents=[
+        stock_analyst_agent, 
+        trend_predictor_agent
+        ],
     tools=[
         AgentTool(news_analyst_agent),
         FunctionTool(get_current_time)
