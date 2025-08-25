@@ -1,5 +1,5 @@
 import sqlite3
-from config import DB_PATH
+from customer_learner_support_agent.config import DB_PATH
 
 # ------------------------------
 # Initialize all tables
