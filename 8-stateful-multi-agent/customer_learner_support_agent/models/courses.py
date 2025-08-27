@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from .base import Base
-
+from customer_learner_support_agent.models.base import Base
 
 class Course(Base):
     __tablename__ = "courses"

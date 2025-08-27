@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from .base import Base
+from customer_learner_support_agent.models.base import Base
 import datetime
 
 
