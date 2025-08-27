@@ -66,14 +66,15 @@ Your responsibilities are:
 root_agent = Agent(
     name="customer_learner_support_agent",
     model="gemini-2.0-flash",
-    description="Educational Customer Learner Support Agent orchestrating specialized sub-agents for handling course, policy, sales, order, and learner progress inquiries.",
+    description="Educational Customer Learner Support Agent orchestrating specialized " \
+    "sub-agents for handling course, policy, sales, order, and learner progress inquiries.",
     instruction=instruction_text,
     sub_agents=[
         course_support_agent,
-        order_agent,
-        policy_agent,
-        progress_tracker_agent,
-        sales_agent
+        # order_agent,
+        # policy_agent,
+        # progress_tracker_agent,
+        # sales_agent
     ],
     tools=[
         FunctionTool(log_interaction),
