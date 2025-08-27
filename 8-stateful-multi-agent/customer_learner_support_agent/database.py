@@ -1,169 +1,147 @@
-import sqlite3
-from customer_learner_support_agent.config import DB_PATH
+"""
+database.py
+
+Persistent database operations for the Customer/Learner Support Agent project.
+Uses SQLAlchemy ORM for all CRUD operations.
+
+Tables:
+- User
+- Course
+- Enrollment
+- Interaction
+- Feedback
+
+All operations use SessionLocal from db_session_service.py.
+
+"""
+
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Text, CheckConstraint, func
+from sqlalchemy.orm import relationship
+from db_session_service import SessionLocal
+from base import Base
+from datetime import datetime
 
 # ------------------------------
-# Initialize all tables
+# Models
 # ------------------------------
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+class User(Base):
+    __tablename__ = "users"
+    id = Column(String, primary_key=True)
+    username = Column(String, nullable=False)
+    email = Column(String, unique=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Users table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id TEXT PRIMARY KEY,
-            user_name TEXT NOT NULL,
-            email TEXT UNIQUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-
-    # # Courses table
-    # cursor.execute("""
-    #     CREATE TABLE IF NOT EXISTS courses (
-    #         course_id TEXT PRIMARY KEY,
-    #         course_name TEXT NOT NULL,
-    #         description TEXT,
-    #         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    #     )
-    # """)
-
-    # # Enrollments table
-    # cursor.execute("""
-    #     CREATE TABLE IF NOT EXISTS enrollments (
-    #         enrollment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #         user_id TEXT NOT NULL,
-    #         course_id TEXT NOT NULL,
-    #         enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    #         completion_status TEXT DEFAULT 'in_progress',
-    #         FOREIGN KEY (user_id) REFERENCES users(user_id),
-    #         FOREIGN KEY (course_id) REFERENCES courses(course_id)
-    #     )
-    # """)
-
-    # # Interactions table
-    # cursor.execute("""
-    #     CREATE TABLE IF NOT EXISTS interactions (
-    #         interaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #         user_id TEXT NOT NULL,
-    #         course_id TEXT NOT NULL,
-    #         activity TEXT NOT NULL,
-    #         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    #         FOREIGN KEY (user_id) REFERENCES users(user_id),
-    #         FOREIGN KEY (course_id) REFERENCES courses(course_id)
-    #     )
-    # """)
-
-    # # Feedback table
-    # cursor.execute("""
-    #     CREATE TABLE IF NOT EXISTS feedback (
-    #         feedback_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #         user_id TEXT NOT NULL,
-    #         course_id TEXT NOT NULL,
-    #         rating INTEGER CHECK(rating >= 1 AND rating <= 5),
-    #         comments TEXT,
-    #         submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    #         FOREIGN KEY (user_id) REFERENCES users(user_id),
-    #         FOREIGN KEY (course_id) REFERENCES courses(course_id)
-    #     )
-    # """)
-
-    conn.commit()
-    conn.close()
+    enrollments = relationship("Enrollment", back_populates="user")
+    interactions = relationship("Interaction", back_populates="user")
+    feedbacks = relationship("Feedback", back_populates="user")
 
 
-# ------------------------------
-# User Helper Functions
-# ------------------------------
-def get_user(user_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT user_id, user_name, email FROM users WHERE user_id = ?", (user_id,))
-    user = cursor.fetchone()
-    conn.close()
-    return user
+class Course(Base):
+    __tablename__ = "courses"
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    enrollments = relationship("Enrollment", back_populates="course")
+    interactions = relationship("Interaction", back_populates="course")
+    feedbacks = relationship("Feedback", back_populates="course")
 
 
-def create_user(user_id, user_name, email=None):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO users (user_id, user_name, email) VALUES (?, ?, ?)",
-        (user_id, user_name, email)
+class Enrollment(Base):
+    __tablename__ = "enrollments"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    course_id = Column(String, ForeignKey("courses.id"), nullable=False)
+    enrollment_date = Column(DateTime, default=datetime.utcnow)
+    completion_status = Column(String, default="in_progress")
+
+    user = relationship("User", back_populates="enrollments")
+    course = relationship("Course", back_populates="enrollments")
+
+
+class Interaction(Base):
+    __tablename__ = "interactions"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    course_id = Column(String, ForeignKey("courses.id"), nullable=True)
+    activity = Column(Text, nullable=False)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="interactions")
+    course = relationship("Course", back_populates="interactions")
+
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    course_id = Column(String, ForeignKey("courses.id"), nullable=False)
+    rating = Column(Integer, nullable=False)
+    comments = Column(Text, nullable=True)
+    submitted_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        CheckConstraint("rating >= 1 AND rating <= 5", name="rating_check"),
     )
-    conn.commit()
-    conn.close()
+
+    user = relationship("User", back_populates="feedbacks")
+    course = relationship("Course", back_populates="feedbacks")
 
 
 # ------------------------------
-# Course Helper Functions
+# Helper Functions
 # ------------------------------
-def create_course(course_id, course_name, description=None):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO courses (course_id, course_name, description) VALUES (?, ?, ?)",
-        (course_id, course_name, description)
-    )
-    conn.commit()
-    conn.close()
+def get_user(user_id: str):
+    with SessionLocal() as session:
+        return session.query(User).filter_by(id=user_id).first()
 
 
-def get_course(course_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM courses WHERE course_id = ?", (course_id,))
-    course = cursor.fetchone()
-    conn.close()
-    return course
+def create_user(user_id: str, username: str, email: str = None):
+    with SessionLocal() as session:
+        user = User(id=user_id, username=username, email=email)
+        session.add(user)
+        session.commit()
+        return user
 
 
-# ------------------------------
-# Enrollment Helper Functions
-# ------------------------------
-def enroll_user_in_course(user_id, course_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO enrollments (user_id, course_id) VALUES (?, ?)",
-        (user_id, course_id)
-    )
-    conn.commit()
-    conn.close()
+def get_course(course_id: str):
+    with SessionLocal() as session:
+        return session.query(Course).filter_by(id=course_id).first()
 
 
-def get_enrollments(user_id):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM enrollments WHERE user_id = ?", (user_id,))
-    enrollments = cursor.fetchall()
-    conn.close()
-    return enrollments
+def create_course(course_id: str, name: str, description: str = None):
+    with SessionLocal() as session:
+        course = Course(id=course_id, name=name, description=description)
+        session.add(course)
+        session.commit()
+        return course
 
 
-# ------------------------------
-# Interaction Helper Functions
-# ------------------------------
-def log_interaction(user_id, course_id, activity):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO interactions (user_id, course_id, activity) VALUES (?, ?, ?)",
-        (user_id, course_id, activity)
-    )
-    conn.commit()
-    conn.close()
+def enroll_user_in_course(user_id: str, course_id: str):
+    with SessionLocal() as session:
+        enrollment = Enrollment(user_id=user_id, course_id=course_id)
+        session.add(enrollment)
+        session.commit()
+        return enrollment
 
 
-# ------------------------------
-# Feedback Helper Functions
-# ------------------------------
-def add_feedback(user_id, course_id, rating, comments=None):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO feedback (user_id, course_id, rating, comments) VALUES (?, ?, ?, ?)",
-        (user_id, course_id, rating, comments)
-    )
-    conn.commit()
-    conn.close()
+def get_enrollments(user_id: str):
+    with SessionLocal() as session:
+        return session.query(Enrollment).filter_by(user_id=user_id).all()
+
+
+def log_interaction(user_id: str, activity: str, course_id: str = None):
+    with SessionLocal() as session:
+        interaction = Interaction(user_id=user_id, activity=activity, course_id=course_id)
+        session.add(interaction)
+        session.commit()
+        return interaction
+
+
+def add_feedback(user_id: str, course_id: str, rating: int, comments: str = None):
+    with SessionLocal() as session:
+        feedback = Feedback(user_id=user_id, course_id=course_id, rating=rating, comments=comments)
+        session.add(feedback)
+        session.commit()
+        return feedback
