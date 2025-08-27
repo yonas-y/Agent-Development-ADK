@@ -1,58 +1,79 @@
 """
 setup_db.py
 
-This script initializes the SQLite database for the Customer/Learner Support Agent
-project. It performs the following tasks:
+Setup script for the Customer/Learner Support Agent database.
 
-1. Creates all necessary tables (users, courses, purchases) if they do not exist.
-2. Seeds the database with initial courses related to computer engineering.
-
-Usage:
-------
-Run this script once before starting the main application to ensure the database
-and initial data are ready.
+- Creates all tables: users, courses, enrollments, interactions, feedback.
+- Seeds the database with sample computer engineering courses.
+- Usage: run this script once before starting the main app.
 
 Example:
     python setup_db.py
 """
 
-from sqlalchemy.orm import Session
-from db_session_service import engine
+from db_session_service import engine, SessionLocal
 from base import Base
-from models.courses import Course
+from database import create_course
+from sqlalchemy import text
 
-# 1️⃣ Create tables
-Base.metadata.create_all(bind=engine)
-
-# 2️⃣ Seed initial courses
-courses = [
+# ------------------------------
+# Define sample courses
+# ------------------------------
+sample_courses = [
     {
-        "title": "Introduction to Computer Architecture",
-        "description": "Fundamentals of digital logic, CPU design, memory hierarchy, and instruction set architectures."
+        "id": "CE101",
+        "name": "Digital Logic Design",
+        "description": "Learn fundamentals of digital circuits, logic gates, combinational and sequential circuits."
     },
     {
-        "title": "Embedded Systems Design",
-        "description": "Microcontrollers, real-time systems, and hardware-software co-design with hands-on C programming."
+        "id": "CE102",
+        "name": "Computer Architecture",
+        "description": "Understand CPU design, memory hierarchy, instruction set architectures, and pipelining."
     },
     {
-        "title": "Computer Networks & Security",
-        "description": "Principles of TCP/IP, routing, switching, and cybersecurity basics including encryption and firewalls."
+        "id": "CE103",
+        "name": "Embedded Systems",
+        "description": "Design and program microcontrollers and embedded devices for real-time applications."
     },
     {
-        "title": "Digital Signal Processing (DSP)",
-        "description": "Signal processing, Fourier transforms, filtering, and applications in audio, image, and communications."
+        "id": "CE104",
+        "name": "Data Structures and Algorithms",
+        "description": "Explore fundamental data structures, algorithm design, and complexity analysis."
     },
     {
-        "title": "Machine Learning for Engineers",
-        "description": "Supervised and unsupervised learning with applications in predictive maintenance and anomaly detection."
+        "id": "CE105",
+        "name": "Operating Systems",
+        "description": "Learn about processes, threads, scheduling, memory management, and file systems."
     },
 ]
 
-with Session(engine) as session:
-    for c in courses:
-        exists = session.query(Course).filter_by(title=c["title"]).first()
-        if not exists:
-            session.add(Course(title=c["title"], description=c["description"]))
-    session.commit()
+def main():
+    # ------------------------------
+    # 1. Create all tables
+    # ------------------------------
+    print("🔧 Creating database tables...")
+    Base.metadata.create_all(bind=engine)
+    print("✅ Tables created successfully!")
 
-print("✅ Database setup complete and courses seeded.")
+    # ------------------------------
+    # 2. Seed sample courses
+    # ------------------------------
+    print("🌱 Seeding sample courses...")
+    for course in sample_courses:
+        # Check if course exists before creating
+        with SessionLocal() as session:
+            existing = session.execute(
+                text("SELECT id FROM courses WHERE id = :course_id"),
+                {"course_id": course["id"]}
+            ).fetchone()
+            if not existing:
+                create_course(course_id=course["id"], name=course["name"], description=course["description"])
+                print(f"➕  Added course: {course['name']}")
+            else:
+                print(f"⚠️  Course already exists: {course['name']}")
+
+    print("🎉 Database setup complete!")
+
+
+if __name__ == "__main__":
+    main()
