@@ -15,7 +15,8 @@ All operations use SessionLocal from db_session_service.py.
 
 """
 
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Text, CheckConstraint, func
+from sqlalchemy import Column, String, Integer, Float, Numeric
+from sqlalchemy import ForeignKey, DateTime, Text, CheckConstraint
 from sqlalchemy.orm import relationship
 from db_session_service import SessionLocal
 from base import Base
@@ -40,6 +41,8 @@ class Course(Base):
     __tablename__ = "courses"
     id = Column(String, primary_key=True)
     name = Column(String, nullable=False)
+    duration= Column(Float, nullable=False)  # duration in hours.
+    price= Column(Numeric(10, 2), nullable=False)   # Price in dollars.
     description = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -110,9 +113,17 @@ def get_course(course_id: str):
         return session.query(Course).filter_by(id=course_id).first()
 
 
-def create_course(course_id: str, name: str, description: str = None):
+def create_course(course_id: str, 
+                  name: str, 
+                  duration: float, 
+                  price: float, 
+                  description: str = None):
     with SessionLocal() as session:
-        course = Course(id=course_id, name=name, description=description)
+        course = Course(id=course_id, 
+                        name=name, 
+                        duration=duration, 
+                        price=price, 
+                        description=description)
         session.add(course)
         session.commit()
         return course
