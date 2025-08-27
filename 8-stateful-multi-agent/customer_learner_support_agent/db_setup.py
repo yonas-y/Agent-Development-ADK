@@ -15,6 +15,7 @@ from db_session_service import engine, SessionLocal
 from base import Base
 from database import create_course
 from sqlalchemy import text
+from database import Course
 
 # ------------------------------
 # Define sample courses
@@ -23,27 +24,42 @@ sample_courses = [
     {
         "id": "CE101",
         "name": "Digital Logic Design",
-        "description": "Learn fundamentals of digital circuits, logic gates, combinational and sequential circuits."
+        "duration": 15,
+        "price": 99.99,
+        "description": "Learn fundamentals of digital circuits, logic gates, "
+        "combinational and sequential circuits."
     },
     {
         "id": "CE102",
         "name": "Computer Architecture",
-        "description": "Understand CPU design, memory hierarchy, instruction set architectures, and pipelining."
+        "duration": 20,
+        "price": 159.99,
+        "description": "Understand CPU design, memory hierarchy, "
+        "instruction set architectures, and pipelining."
     },
     {
         "id": "CE103",
         "name": "Embedded Systems",
-        "description": "Design and program microcontrollers and embedded devices for real-time applications."
+        "duration": 20,
+        "price": 199.99,
+        "description": "Design and program microcontrollers and embedded devices "
+        "for real-time applications."
     },
     {
         "id": "CE104",
         "name": "Data Structures and Algorithms",
-        "description": "Explore fundamental data structures, algorithm design, and complexity analysis."
+        "duration": 20,
+        "price": 199.99,
+        "description": "Explore fundamental data structures, algorithm design, "
+        "and complexity analysis."
     },
     {
         "id": "CE105",
         "name": "Operating Systems",
-        "description": "Learn about processes, threads, scheduling, memory management, and file systems."
+        "duration": 20,
+        "price": 199.99,
+        "description": "Learn about processes, threads, scheduling, memory management, "
+        "and file systems."
     },
 ]
 
@@ -67,13 +83,25 @@ def main():
                 {"course_id": course["id"]}
             ).fetchone()
             if not existing:
-                create_course(course_id=course["id"], name=course["name"], description=course["description"])
+                create_course(course_id=course["id"], 
+                              name=course["name"], 
+                              duration=course["duration"],                               
+                              price=course["price"],
+                              description=course["description"]
+                               )
                 print(f"➕  Added course: {course['name']}")
             else:
-                print(f"⚠️  Course already exists: {course['name']}")
+                # Update existing course.
+                db_course = session.query(Course).filter(Course.id == course["id"]).first()
+                db_course.name = course["name"]
+                db_course.description = course["description"]
+                db_course.duration = course["duration"]
+                db_course.price = course["price"]
+
+                session.commit()
+                print(f"🔄 Updated course: {course['name']}")
 
     print("🎉 Database setup complete!")
-
 
 if __name__ == "__main__":
     main()
