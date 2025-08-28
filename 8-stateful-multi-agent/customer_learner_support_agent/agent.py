@@ -1,11 +1,10 @@
 from google.adk.agents import Agent
-from google.adk.tools import FunctionTool
-from .sub_agents.course_support_agent import course_support_agent
-from .sub_agents.order_agent import order_agent
-from .sub_agents.policy_agent import policy_agent
-from .sub_agents.progress_tracker_agent import progress_tracker_agent
-from .sub_agents.sales_agent import sales_agent
-from .utils.logger import log_interaction   
+from sub_agents.course_support_agent import course_support_agent
+from sub_agents.sales_agent import sales_agent
+from sub_agents.order_agent import order_agent
+from sub_agents.policy_agent import policy_agent
+from sub_agents.progress_tracker_agent import progress_tracker_agent
+  
 
 instruction_text = """
 You are the **Customer Learner Support Agent**, designed for educational purposes.  
@@ -71,12 +70,10 @@ root_agent = Agent(
     instruction=instruction_text,
     sub_agents=[
         course_support_agent,
-        # order_agent,
-        # policy_agent,
-        # progress_tracker_agent,
-        # sales_agent
+        sales_agent,
+        order_agent,
+        policy_agent,
+        progress_tracker_agent,
     ],
-    tools=[
-        FunctionTool(log_interaction),
-        ]
+    tools=[],
 )
