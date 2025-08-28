@@ -126,6 +126,24 @@ def create_user(user_id: str, username: str, email: str = None):
 def get_course(course_id: str):
     with SessionLocal() as session:
         return session.query(Course).filter_by(id=course_id).first()
+    
+    
+def get_all_courses():
+    """
+    Retrieve all courses and return as a list of dictionaries for agent responses.
+    """
+    with SessionLocal() as session:
+        courses = session.query(Course).all()
+        return [
+            {
+                "id": c.id,
+                "name": c.name,
+                "duration": float(c.duration),
+                "price": float(c.price),
+                "description": c.description
+            }
+            for c in courses
+        ]
 
 
 def create_course(course_id: str, 
