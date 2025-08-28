@@ -1,5 +1,0 @@
-from sqlalchemy.orm import Session
-from customer_learner_support_agent.db_session_service import engine
-from customer_learner_support_agent.models.courses import Course
-from customer_learner_support_agent.models.purchase import Purchase
-
