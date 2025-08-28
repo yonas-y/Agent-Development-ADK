@@ -13,9 +13,9 @@ Example:
 
 from db_session_service import engine, SessionLocal
 from base import Base
-from database import create_course
-from sqlalchemy import text
+from models.courses import create_course
 from database import Course
+from sqlalchemy import text
 
 # ------------------------------
 # Define sample courses
