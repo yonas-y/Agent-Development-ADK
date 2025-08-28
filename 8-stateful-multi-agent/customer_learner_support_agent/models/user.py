@@ -1,14 +1,18 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
-from customer_learner_support_agent.models.base import Base
+from db_session_service import SessionLocal
+from database import User
 
 
-class User(Base):
-    __tablename__ = "users"
+# ------------------------------
+# Helper Functions
+# ------------------------------
+def get_user(user_id: str):
+    with SessionLocal() as session:
+        return session.query(User).filter_by(id=user_id).first()
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String, unique=True, nullable=False)
-    email = Column(String, unique=True, nullable=False)
 
-    # One-to-many relationship: one user can have many purchases
-    purchases = relationship("Purchase", back_populates="user")
+def create_user(user_id: str, username: str, email: str = None):
+    with SessionLocal() as session:
+        user = User(id=user_id, username=username, email=email)
+        session.add(user)
+        session.commit()
+        return user
