@@ -1,4 +1,6 @@
 from google.adk.agents import Agent
+from google.adk.tools import FunctionTool
+from database import get_all_courses
 
 course_support_agent_instruction = """
 You are the **Course Support Agent**, responsible for assisting learners with 
@@ -36,5 +38,7 @@ course_support_agent = Agent(
     description="Course Support Agent handling inquiries related to educational " \
     "course content and learner assistance.",
     instruction=course_support_agent_instruction,
-    tools=[]
+    tools=[
+        FunctionTool(get_all_courses),
+    ]
 )
