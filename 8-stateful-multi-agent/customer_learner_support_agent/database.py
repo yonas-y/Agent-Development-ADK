@@ -60,7 +60,10 @@ class Purchase(Base):
     id = Column(String, primary_key=True, index=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     course_id = Column(String, ForeignKey("courses.id"), nullable=False)
-    purchase_date = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    status = Column(String, default="completed")  # completed | canceled | refunded
+    canceled_at = Column(DateTime, nullable=True)
+    refunded_at = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="purchases")
     course = relationship("Course", back_populates="purchases")
@@ -105,105 +108,3 @@ class Feedback(Base):
 
     user = relationship("User", back_populates="feedbacks")
     course = relationship("Course", back_populates="feedbacks")
-
-
-# ------------------------------
-# Helper Functions
-# ------------------------------
-def get_user(user_id: str):
-    with SessionLocal() as session:
-        return session.query(User).filter_by(id=user_id).first()
-
-
-def create_user(user_id: str, username: str, email: str = None):
-    with SessionLocal() as session:
-        user = User(id=user_id, username=username, email=email)
-        session.add(user)
-        session.commit()
-        return user
-
-
-def get_course(course_id: str):
-    with SessionLocal() as session:
-        return session.query(Course).filter_by(id=course_id).first()
-    
-    
-def get_all_courses():
-    """
-    Retrieve all courses and return as a list of dictionaries for agent responses.
-    """
-    with SessionLocal() as session:
-        courses = session.query(Course).all()
-        return [
-            {
-                "id": c.id,
-                "name": c.name,
-                "duration": float(c.duration),
-                "price": float(c.price),
-                "description": c.description
-            }
-            for c in courses
-        ]
-
-
-def create_course(course_id: str, 
-                  name: str, 
-                  duration: float, 
-                  price: float, 
-                  description: str = None):
-    with SessionLocal() as session:
-        course = Course(id=course_id, 
-                        name=name, 
-                        duration=duration, 
-                        price=price, 
-                        description=description)
-        session.add(course)
-        session.commit()
-        return course
-
-
-def enroll_user_in_course(user_id: str, course_id: str):
-    with SessionLocal() as session:
-        enrollment = Enrollment(user_id=user_id, course_id=course_id)
-        session.add(enrollment)
-        session.commit()
-        return enrollment
-
-
-def get_enrollments(user_id: str):
-    with SessionLocal() as session:
-        return session.query(Enrollment).filter_by(user_id=user_id).all()
-
-
-def add_purchase(user_id: str, course_id: str, purchase_date: datetime):
-    with SessionLocal() as session:
-        purchase = Purchase(user_id=user_id, 
-                            course_id=course_id, 
-                            purchase_date=purchase_date)
-        session.add(purchase)
-        session.commit()
-        return purchase
-
-
-def get_purchases(user_id: str):
-    with SessionLocal() as session:
-        return session.query(Purchase).filter_by(user_id=user_id).all()
-
-
-def log_interaction(user_id: str, activity: str, course_id: str = None):
-    with SessionLocal() as session:
-        interaction = Interaction(user_id=user_id, activity=activity, course_id=course_id)
-        session.add(interaction)
-        session.commit()
-        return interaction
-
-
-def add_feedback(user_id: str, course_id: str, rating: int, comments: str = None):
-    with SessionLocal() as session:
-        feedback = Feedback(user_id=user_id, 
-                            course_id=course_id, 
-                            rating=rating, 
-                            comments=comments)
-        session.add(feedback)
-        session.commit()
-        return feedback
