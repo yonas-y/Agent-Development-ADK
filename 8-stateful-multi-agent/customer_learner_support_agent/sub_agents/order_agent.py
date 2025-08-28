@@ -1,4 +1,7 @@
 from google.adk.agents import Agent
+from google.adk.tools import FunctionTool
+from models.purchase import (check_and_record_purchase, get_order_history, get_purchase_details, 
+                             get_purchases, process_refund, cancel_purchase)
 
 order_agent_instruction = """
 You are the **Order Agent**, responsible for managing purchase and transaction-related 
@@ -36,5 +39,12 @@ order_agent = Agent(
     description="Order Agent handling inquiries related to educational " \
     "payments, billing, and order management.",
     instruction=order_agent_instruction,
-    tools=[]
+    tools=[
+        FunctionTool(check_and_record_purchase),
+        FunctionTool(get_order_history),
+        FunctionTool(get_purchase_details),
+        FunctionTool(get_purchases),
+        FunctionTool(process_refund),
+        FunctionTool(cancel_purchase),
+        ]
 )
