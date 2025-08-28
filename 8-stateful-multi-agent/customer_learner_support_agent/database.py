@@ -8,6 +8,7 @@ Tables:
 - User
 - Course
 - Enrollment
+- Purchase
 - Interaction
 - Feedback
 
@@ -35,6 +36,7 @@ class User(Base):
     enrollments = relationship("Enrollment", back_populates="user")
     interactions = relationship("Interaction", back_populates="user")
     feedbacks = relationship("Feedback", back_populates="user")
+    purchases = relationship("Purchase", back_populates="user")
 
 
 class Course(Base):
@@ -49,11 +51,24 @@ class Course(Base):
     enrollments = relationship("Enrollment", back_populates="course")
     interactions = relationship("Interaction", back_populates="course")
     feedbacks = relationship("Feedback", back_populates="course")
+    purchases = relationship("Purchase", back_populates="course")
+
+
+class Purchase(Base):
+    __tablename__ = "purchases"
+
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    course_id = Column(String, ForeignKey("courses.id"), nullable=False)
+    purchase_date = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="purchases")
+    course = relationship("Course", back_populates="purchases")
 
 
 class Enrollment(Base):
     __tablename__ = "enrollments"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(String, primary_key=True, autoincrement=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     course_id = Column(String, ForeignKey("courses.id"), nullable=False)
     enrollment_date = Column(DateTime, default=datetime.utcnow)
@@ -65,7 +80,7 @@ class Enrollment(Base):
 
 class Interaction(Base):
     __tablename__ = "interactions"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(String, primary_key=True, autoincrement=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     course_id = Column(String, ForeignKey("courses.id"), nullable=True)
     activity = Column(Text, nullable=False)
@@ -77,7 +92,7 @@ class Interaction(Base):
 
 class Feedback(Base):
     __tablename__ = "feedback"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(String, primary_key=True, autoincrement=True)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     course_id = Column(String, ForeignKey("courses.id"), nullable=False)
     rating = Column(Integer, nullable=False)
@@ -142,6 +157,21 @@ def get_enrollments(user_id: str):
         return session.query(Enrollment).filter_by(user_id=user_id).all()
 
 
+def add_purchase(user_id: str, course_id: str, purchase_date: datetime):
+    with SessionLocal() as session:
+        purchase = Purchase(user_id=user_id, 
+                            course_id=course_id, 
+                            purchase_date=purchase_date)
+        session.add(purchase)
+        session.commit()
+        return purchase
+
+
+def get_purchases(user_id: str):
+    with SessionLocal() as session:
+        return session.query(Purchase).filter_by(user_id=user_id).all()
+
+
 def log_interaction(user_id: str, activity: str, course_id: str = None):
     with SessionLocal() as session:
         interaction = Interaction(user_id=user_id, activity=activity, course_id=course_id)
@@ -152,7 +182,10 @@ def log_interaction(user_id: str, activity: str, course_id: str = None):
 
 def add_feedback(user_id: str, course_id: str, rating: int, comments: str = None):
     with SessionLocal() as session:
-        feedback = Feedback(user_id=user_id, course_id=course_id, rating=rating, comments=comments)
+        feedback = Feedback(user_id=user_id, 
+                            course_id=course_id, 
+                            rating=rating, 
+                            comments=comments)
         session.add(feedback)
         session.commit()
         return feedback
