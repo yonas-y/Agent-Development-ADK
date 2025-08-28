@@ -1,6 +1,6 @@
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
-from database import get_all_courses
+from models.courses import get_all_courses
 
 course_support_agent_instruction = """
 You are the **Course Support Agent**, responsible for assisting learners with 
